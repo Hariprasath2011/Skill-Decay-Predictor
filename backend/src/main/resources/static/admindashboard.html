@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Admin Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background-color: #f4f6f8;
+    }
+
+    header {
+      background: #1e293b;
+      color: white;
+      padding: 15px 30px;
+      font-size: 20px;
+    }
+
+    .container {
+      padding: 30px;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 20px;
+    }
+
+    .card {
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+    }
+
+    .card h3 {
+      margin: 0;
+      font-size: 18px;
+      color: #555;
+    }
+
+    .card p {
+      margin-top: 10px;
+      font-size: 28px;
+      font-weight: bold;
+      color: #1e293b;
+    }
+
+    .danger {
+      background-color: #fee2e2;
+    }
+
+    footer {
+      margin-top: 40px;
+      text-align: center;
+      color: #888;
+    }
+  </style>
+</head>
+
+<body>
+
+<header>
+  Skill Decay Predictor — Admin Dashboard
+</header>
+
+<div class="container">
+
+  <div class="stats">
+    <div class="card">
+      <h3>Total Users</h3>
+      <p id="totalUsers">—</p>
+    </div>
+
+    <div class="card">
+      <h3>Active Users</h3>
+      <p id="activeUsers">—</p>
+    </div>
+
+    <div class="card">
+      <h3>Total Skills</h3>
+      <p id="totalSkills">—</p>
+    </div>
+
+    <div class="card danger">
+      <h3>High Skill Decay Users</h3>
+      <p id="highRiskUsers">—</p>
+    </div>
+  </div>
+
+  <footer>
+    © 2026 Skill Decay Predictor | Admin Panel
+  </footer>
+
+</div>
+
+<script>
+  function isAdmin() {
+    const token = localStorage.getItem("token");
+    if (!token) return false;
+
+    const payload = JSON.parse(atob(token.split(".")[1]));
+    return payload.roles && payload.roles.includes("ROLE_ADMIN");
+  }
+
+  if (!isAdmin()) {
+    alert("Access Denied: Admins only");
+    window.location.href = "/login.html";
+  }
+
+  fetch("http://localhost:8080/admin/dashboard", {
+    headers: {
+      "Authorization": "Bearer " + localStorage.getItem("token")
+    }
+  })
+  .then(res => {
+    if (!res.ok) throw new Error("Unauthorized");
+    return res.json();
+  })
+  .then(data => {
+    document.getElementById("totalUsers").textContent = data.totalUsers;
+    document.getElementById("activeUsers").textContent = data.activeUsers;
+    document.getElementById("totalSkills").textContent = data.totalSkills;
+    document.getElementById("highRiskUsers").textContent = data.highRiskUsers;
+  })
+  .catch(err => {
+    console.error(err);
+    alert("Failed to load dashboard data");
+  });
+</script>
+
+</body>
+</html>
